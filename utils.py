@@ -44,12 +44,21 @@ def load_checkpoint(filepath, device):
 
 
 def save_checkpoint(filepath, obj):
-    print("Saving checkpoint to {}".format(filepath))
+    if not 'latest' in filepath:
+        print("Saving checkpoint to {}".format(filepath))
+
     torch.save(obj, filepath)
-    print("Complete.")
+
+    if not 'latest' in filepath:
+        print("Complete.")
 
 
 def scan_checkpoint(cp_dir, prefix):
+    path_of_latest = os.path.join(cp_dir, f'{prefix}latest')
+    if os.path.exists(path_of_latest):
+        print(f'found {path_of_latest}')
+        return path_of_latest
+    
     pattern = os.path.join(cp_dir, prefix + '????????')
     cp_list = glob.glob(pattern)
     if len(cp_list) == 0:

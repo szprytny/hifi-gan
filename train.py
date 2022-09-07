@@ -182,6 +182,15 @@ def train(rank, a, h):
                 if steps % a.summary_interval == 0:
                     sw.add_scalar("training/gen_loss_total", loss_gen_all, steps)
                     sw.add_scalar("training/mel_spec_error", mel_error, steps)
+                    save_checkpoint(f"{a.checkpoint_path}/g_latest",
+                                    {'generator': (generator.module if h.num_gpus > 1 else generator).state_dict()})
+                    save_checkpoint(f"{a.checkpoint_path}/do_latest",
+                                {'mpd': (mpd.module if h.num_gpus > 1
+                                                        else mpd).state_dict(),
+                                'msd': (msd.module if h.num_gpus > 1
+                                                    else msd).state_dict(),
+                                'optim_g': optim_g.state_dict(), 'optim_d': optim_d.state_dict(), 'steps': steps,
+                                'epoch': epoch})
 
                 # Validation
                 if steps % a.validation_interval == 0:  # and steps != 0:
@@ -198,8 +207,8 @@ def train(rank, a, h):
                                                           h.fmin, h.fmax_for_loss)
                             val_err_tot += F.l1_loss(y_mel, y_g_hat_mel).item()
 
-                            if j <= 4:
-                                if steps == 0:
+                            if j <= 12:
+                                if steps % 25000 == 0:
                                     sw.add_audio('gt/y_{}'.format(j), y[0], steps, h.sampling_rate)
                                     sw.add_figure('gt/y_spec_{}'.format(j), plot_spectrogram(x[0]), steps)
 
@@ -214,7 +223,7 @@ def train(rank, a, h):
                         sw.add_scalar("validation/mel_spec_error", val_err, steps)
 
                     generator.train()
-
+            
             steps += 1
 
         scheduler_g.step()
@@ -230,12 +239,12 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--group_name', default=None)
-    parser.add_argument('--input_wavs_dir', default='LJSpeech-1.1/wavs')
+    parser.add_argument('--input_wavs_dir', default='C:/model/RAD2/')
     parser.add_argument('--input_mels_dir', default='ft_dataset')
-    parser.add_argument('--input_training_file', default='LJSpeech-1.1/training.txt')
-    parser.add_argument('--input_validation_file', default='LJSpeech-1.1/validation.txt')
+    parser.add_argument('--input_training_file', default='C:/model/RAD2/train.txt')
+    parser.add_argument('--input_validation_file', default='C:/model/RAD2/test.txt')
     parser.add_argument('--checkpoint_path', default='cp_hifigan')
-    parser.add_argument('--config', default='')
+    parser.add_argument('-c', '--config', default='config_v1.json')
     parser.add_argument('--training_epochs', default=3100, type=int)
     parser.add_argument('--stdout_interval', default=5, type=int)
     parser.add_argument('--checkpoint_interval', default=5000, type=int)

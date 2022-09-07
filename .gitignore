@@ -1,0 +1,6 @@
+__pycache__/
+cp_hifigan*/
+LJSpeech-1.1
+generated_files_from_mel/
+test_files/
+test_mel_files/
