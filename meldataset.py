@@ -72,15 +72,25 @@ def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin,
     return spec
 
 
-def get_dataset_filelist(a):
-    with open(a.input_training_file, 'r', encoding='utf-8') as fi:
-        training_files = [os.path.join(a.input_wavs_dir, x.split('|')[0])
+def get_dataset_filelist(c):
+    training_files = c['training_files']
+    validation_files = c['validation_files']
+    training_dataset = []
+    validation_dataset = []
+    
+    for f in training_files:
+        audio_base_path = os.path.dirname(f)
+        with open(f, 'r', encoding='utf-8') as fi:
+            training_dataset += [os.path.join(audio_base_path, x.split('|')[0])
                           for x in fi.read().split('\n') if len(x) > 0]
 
-    with open(a.input_validation_file, 'r', encoding='utf-8') as fi:
-        validation_files = [os.path.join(a.input_wavs_dir, x.split('|')[0])
-                            for x in fi.read().split('\n') if len(x) > 0]
-    return training_files, validation_files
+    for f in validation_files:
+        audio_base_path = os.path.dirname(f)
+        with open(f, 'r', encoding='utf-8') as fi:
+            validation_dataset += [os.path.join(audio_base_path, x.split('|')[0])
+                          for x in fi.read().split('\n') if len(x) > 0]
+
+    return training_dataset, validation_dataset
 
 
 class MelDataset(torch.utils.data.Dataset):
@@ -117,8 +127,8 @@ class MelDataset(torch.utils.data.Dataset):
                 audio = normalize(audio) * 0.95
             self.cached_wav = audio
             if sampling_rate != self.sampling_rate:
-                raise ValueError("{} SR doesn't match target {} SR".format(
-                    sampling_rate, self.sampling_rate))
+                raise ValueError("{} SR doesn't match target {} SR - {}".format(
+                    sampling_rate, self.sampling_rate, filename))
             self._cache_ref_count = self.n_cache_reuse
         else:
             audio = self.cached_wav
