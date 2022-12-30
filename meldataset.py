@@ -89,6 +89,7 @@ def get_dataset_filelist(c):
         with open(f, 'r', encoding='utf-8') as fi:
             validation_dataset += [os.path.join(audio_base_path, x.split('|')[0])
                           for x in fi.read().split('\n') if len(x) > 0]
+    validation_dataset.reverse()
 
     return training_dataset, validation_dataset
 
