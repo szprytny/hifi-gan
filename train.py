@@ -236,7 +236,6 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--group_name', default=None)
-    parser.add_argument('--input_wavs_dir', default='C:/model/splitter')
     parser.add_argument('--input_mels_dir', default='ft_dataset')
     parser.add_argument('--checkpoint_path', default='cp_hifigan_mix')
     parser.add_argument('-c', '--config', default='config.json')

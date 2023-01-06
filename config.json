@@ -35,7 +35,13 @@
   "n_log_samples": 8,
 
   "data_config": {
-    "training_files": ["D:/audio-datasety/MAN/train.txt"],
-    "validation_files": ["D:/audio-datasety/MAN/test.txt"]
+    "training_files": [
+      "D:/audio-datasety/MAN/train.txt",
+      "D:/audio-datasety/WOMAN/train.txt"
+    ],
+    "validation_files": [
+      "D:/audio-datasety/MAN/test.txt",
+      "D:/audio-datasety/WOMAN/train.txt"
+    ]
   }
 }
