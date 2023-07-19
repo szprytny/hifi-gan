@@ -54,7 +54,7 @@ def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin,
 
     global mel_basis, hann_window
     if fmax not in mel_basis:
-        mel = librosa_mel_fn(sampling_rate, n_fft, num_mels, fmin, fmax)
+        mel = librosa_mel_fn(sr=sampling_rate, n_fft=n_fft, n_mels=num_mels, fmin=fmin, fmax=fmax)
         mel_basis[str(fmax)+'_'+str(y.device)] = torch.from_numpy(mel).float().to(y.device)
         hann_window[str(y.device)] = torch.hann_window(win_size).to(y.device)
 
@@ -62,7 +62,7 @@ def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin,
     y = y.squeeze(1)
 
     spec = torch.stft(y, n_fft, hop_length=hop_size, win_length=win_size, window=hann_window[str(y.device)],
-                      center=center, pad_mode='reflect', normalized=False, onesided=True)
+                      center=center, pad_mode='reflect', normalized=False, onesided=True, return_complex=False)
 
     spec = torch.sqrt(spec.pow(2).sum(-1)+(1e-9))
 
@@ -77,18 +77,24 @@ def get_dataset_filelist(c):
     validation_files = c['validation_files']
     training_dataset = []
     validation_dataset = []
+
+    def is_valid_line(line: str):
+        if len(line) > 0:
+            duration = float(line.split('|')[4])
+            return duration >=0.6 and duration <= 16
+        return 0
     
     for f in training_files:
         audio_base_path = os.path.dirname(f)
         with open(f, 'r', encoding='utf-8') as fi:
             training_dataset += [os.path.join(audio_base_path, x.split('|')[0])
-                          for x in fi.read().split('\n') if len(x) > 0]
+                          for x in fi.read().split('\n') if is_valid_line(x)]
 
     for f in validation_files:
         audio_base_path = os.path.dirname(f)
         with open(f, 'r', encoding='utf-8') as fi:
             validation_dataset += [os.path.join(audio_base_path, x.split('|')[0])
-                          for x in fi.read().split('\n') if len(x) > 0]
+                          for x in fi.read().split('\n') if is_valid_line(x)]
     validation_dataset.reverse()
 
     return training_dataset, validation_dataset

@@ -9,8 +9,6 @@ import torch
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DistributedSampler, DataLoader
-import torch.multiprocessing as mp
-from torch.distributed import init_process_group
 from torch.nn.parallel import DistributedDataParallel
 from env import AttrDict, build_env
 from meldataset import MelDataset, mel_spectrogram, get_dataset_filelist
